@@ -1,0 +1,142 @@
+name: 'Notification Action'
+description: 'Send notification to zulip instance'
+branding:
+  icon: 'arrow-right-circle'
+  color: 'gray-dark'
+inputs:
+  api-key:
+    description: "Api Key to Send Message"
+    required: true
+  email:
+    description: "Email of sender"
+    required: false
+    default: "github-bot@zulip.kugelbit.com"
+  organization-url:
+    description: "Url of organization"
+    required: false
+    default: "https://zulip.kugelbit.com"
+  to:
+    description: "Location to send notification"
+    required: false
+    default: "notifications"
+  type:
+    description: "Type of location"
+    required: false
+    default: "stream"
+  topic:
+    description: "Topic of the message"
+    required: true
+  content-type:
+    description: 'Content of the message'
+    required: true
+  workflow-ref:
+    description: "Workflow ref, use $env.WORKFLOW_REF"
+    required: true
+  workflow-url:
+    description: "Workflow URL, use $env.WORKFLOW_URL"
+    required: true
+  tag:
+    description: "App tag version"
+    required: false
+    default: "unknown"
+runs:
+  using: 'composite'
+  steps:
+    - name: Notify deployment start
+      uses: zulip/github-actions-zulip/send-message@v1
+      if: ${{ inputs.content-type == 'deployment-start' }}
+      with:
+        api-key:  ${{ inputs.api-key }}
+        email: ${{ inputs.email }}
+        organization-url: ${{ inputs.organization-url }}
+        to: ${{ inputs.to }}
+        type: ${{ inputs.type }}
+        topic: ${{ inputs.topic }}
+        content: |
+          ```spoiler :start:  Deploy started in ${{ inputs.workflow-ref }}
+             Check the link [${{ inputs.workflow-url }}](${{ inputs.workflow-url }})
+    - name: Notify version determined
+      uses: zulip/github-actions-zulip/send-message@v1
+      if: ${{ inputs.content-type == 'version-determined' }}
+      with:
+        api-key:  ${{ inputs.api-key }}
+        email: ${{ inputs.email }}
+        organization-url: ${{ inputs.organization-url }}
+        to: ${{ inputs.to }}
+        type: ${{ inputs.type }}
+        topic: ${{ inputs.topic }}
+        content: |
+          ```spoiler :start:  Determined next version in ${{ inputs.workflow-ref }} as :tag: ${{ inputs.tag }}
+             Check the link [${{ inputs.workflow-url }}](${{ inputs.workflow-url }})
+    - name: Notify build and test success
+      uses: zulip/github-actions-zulip/send-message@v1
+      if: ${{ inputs.content-type == 'build-success' }}
+      with:
+        api-key:  ${{ inputs.api-key }}
+        email: ${{ inputs.email }}
+        organization-url: ${{ inputs.organization-url }}
+        to: ${{ inputs.to }}
+        type: ${{ inputs.type }}
+        topic: ${{ inputs.topic }}
+        content: |
+          @**all**
+          ```spoiler :working_on_it:  *Build and test* success for ${{ inputs.workflow-ref }} as :tag: ${{ inputs.tag }}
+             Check the link [${{ inputs.workflow-url }}](${{ inputs.workflow-url }})
+    - name: Notify image build success
+      uses: zulip/github-actions-zulip/send-message@v1
+      if: ${{ inputs.content-type == 'image-success' }}
+      with:
+        api-key:  ${{ inputs.api-key }}
+        email: ${{ inputs.email }}
+        organization-url: ${{ inputs.organization-url }}
+        to: ${{ inputs.to }}
+        type: ${{ inputs.type }}
+        topic: ${{ inputs.topic }}
+        content: |
+          @**all**
+          ```spoiler :working_on_it:  *Image build* success for for ${{ inputs.workflow-ref }} as :tag: ${{ inputs.tag }}
+             Check the link [${{ inputs.workflow-url }}](${{ inputs.workflow-url }})
+    - name: Notify build failure
+      uses: zulip/github-actions-zulip/send-message@v1
+      if: ${{ inputs.content-type == 'deploy-failure' }}
+      with:
+        api-key:  ${{ inputs.api-key }}
+        email: ${{ inputs.email }}
+        organization-url: ${{ inputs.organization-url }}
+        to: ${{ inputs.to }}
+        type: ${{ inputs.type }}
+        topic: ${{ inputs.topic }}
+        content: |
+          @**all**
+          ```spoiler :working_on_it:  :cross_mark:  Deploy failure for ${{ inputs.workflow-ref }} as :tag: ${{ inputs.tag }}
+             Check the link [${{ inputs.workflow-url }}](${{ inputs.workflow-url }})
+    - name: Notify code released
+      uses: zulip/github-actions-zulip/send-message@v1
+      if: ${{ inputs.content-type == 'code-released' }}
+      with:
+        api-key:  ${{ inputs.api-key }}
+        email: ${{ inputs.email }}
+        organization-url: ${{ inputs.organization-url }}
+        to: ${{ inputs.to }}
+        type: ${{ inputs.type }}
+        topic: ${{ inputs.topic }}
+        content: |
+          @**all** :point_right:  *deploy will start* :point_left:
+          
+          ```spoiler :check: Code released for  ${{ inputs.workflow-ref }} as :tag: ${{ inputs.tag }}
+             Check the link [${{ inputs.workflow-url }}](${{ inputs.workflow-url }})
+    - name: Deploy started
+      uses: zulip/github-actions-zulip/send-message@v1
+      if: ${{ inputs.content-type == 'deploy-started' }}
+      with:
+        api-key:  ${{ inputs.api-key }}
+        email: ${{ inputs.email }}
+        organization-url: ${{ inputs.organization-url }}
+        to: ${{ inputs.to }}
+        type: ${{ inputs.type }}
+        topic: ${{ inputs.topic }}
+        content: |
+          @**all** :point_right:  Deploy *started* :point_left:
+          
+          ```spoiler :start:  Deploy started for ${{ inputs.workflow-ref }} as :tag: ${{ inputs.tag }}
+             Check the link [${{ inputs.workflow-url }}](${{ inputs.workflow-url }})
